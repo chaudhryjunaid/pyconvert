@@ -14,7 +14,7 @@ class UnitCategory:
 class Unit:
     conversion_fns = {}
     abbrevs_to_names = {}
-    names_to_abbrevs = {}
+
     def __init__(self, name, value):
         self.name = name
         if isinstance(value, str):
@@ -22,9 +22,13 @@ class Unit:
         else:
             self.value = value
 
+    def get_names_to_abbrevs(self):
+        return {v: k for k, v in self.abbrevs_to_names.items()}
+
     def print_chart(self):
-        for k, v in 
-        print("%10d $s in %s is: %10d" % ())
+        
+
+
 
 class LengthUnit(Unit):
     conversion_fns = {
@@ -41,15 +45,15 @@ class LengthUnit(Unit):
         "ft": "foot",
         "m": "meter"
     }
-    names_to_abbrevs = {v: k for k, v in abbrevs_to_names.items()}
 
     def __init__(self, s):
         sanitized_unit_str = s.strip().lower()
         match_obj = re.match(r'^\s*([+-]*\d+)\s*([a-z]+)$', sanitized_unit_str)
         val, name = match_obj.group(1,2)
-        super(name, val)
+        super().__init__(name, val)
 
 
 if __name__ == '__main__':
-    LengthUnit("3mi")
+    lu = LengthUnit("3mi")
+    lu.print_chart()
 
