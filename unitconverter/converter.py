@@ -92,7 +92,7 @@ class UnitValue:
     @staticmethod
     def map_unit(orig_unit):
         prefix = UnitValue.get_prefix(orig_unit)
-        remaining_unit = orig_unit.replace(prefix, '')
+        remaining_unit = orig_unit.replace(prefix, '', 1)
         unit = None
         unit_type = None
         for curr_unit_type, curr_unit_data in UnitValue.units.items():
