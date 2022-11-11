@@ -67,13 +67,19 @@ class UnitValue:
 
     def __init__(self, s):
         sanitized_unit_str = s.strip().lower()
-        match_obj = re.match(r'^\s*([+-]*\d+)\s*([a-z]+)$', sanitized_unit_str)
+        match_obj = re.fullmatch(r'^\s*([+-]*\d+)\s*([a-z]+)$', sanitized_unit_str)
+        if not match_obj:
+            raise ValueError
         value, orig_unit = match_obj.group(1, 2)
         prefix, unit, unit_type = UnitValue.map_unit(orig_unit)
         self.prefix = prefix
         self.unit = unit
         self.unit_type = unit_type
         self.value = float(value)
+
+    @staticmethod
+    def match_unit(val, unit_str):
+        return val == unit_str or val == f'{unit_str}s' or val == f'{unit_str}es'
 
     @staticmethod
     def get_prefix(orig_unit):
@@ -91,7 +97,7 @@ class UnitValue:
         unit_type = None
         for curr_unit_type, curr_unit_data in UnitValue.units.items():
             for long_name, abbrev in curr_unit_data["names_to_abbrevs"].items():
-                if remaining_unit.startswith(long_name) or remaining_unit.startswith(abbrev):
+                if UnitValue.match_unit(remaining_unit, long_name) or UnitValue.match_unit(remaining_unit, abbrev):
                     unit_type = curr_unit_type
                     unit = abbrev
                     break
@@ -99,10 +105,9 @@ class UnitValue:
                 break
         else:
             prefix = ""
-            remaining_unit = orig_unit
             for curr_unit_type, curr_unit_data in UnitValue.units.items():
                 for long_name, abbrev in curr_unit_data["names_to_abbrevs"].items():
-                    if orig_unit.startswith(long_name) or orig_unit.startswith(abbrev):
+                    if UnitValue.match_unit(orig_unit, long_name) or UnitValue.match_unit(orig_unit, abbrev):
                         unit_type = curr_unit_type
                         unit = abbrev
                         break
@@ -114,11 +119,18 @@ class UnitValue:
         return f'{self.value:.2f} {self.prefix}{self.unit} ({self.unit_type})'
 
     def __repr__(self):
-        return f'<UnitValue value={self.value:.2f} unit={self.prefix}{self.unit} (type={self.unit_type})'
+        return f'<UnitValue value={self.value:.2f} unit={self.prefix}-{self.unit} (type={self.unit_type})>'
 
 
 if __name__ == '__main__':
-    uv = UnitValue("3mi")
-    print(f'{uv!s}')
-    print(f'{uv!r}')
+    while True:
+        try:
+            val_str = input("enter a unit value? ")
+            if val_str == "":
+                break
+            uv = UnitValue(val_str)
+            print(f'{uv!s}')
+            print(f'{uv!r}')
+        except ValueError:
+            print("Invalid value entered! Please try again!")
 
