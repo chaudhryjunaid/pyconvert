@@ -85,7 +85,7 @@ class UnitValue:
     def get_prefix(orig_unit):
         prefix = ""
         for long_prefix, short_prefix in UnitValue.metric_prefix_names_to_abbrevs.items():
-            if orig_unit.startswith(long_prefix) or (orig_unit.startswith(short_prefix) and len(orig_unit) > len(short_prefix)):
+            if (orig_unit.startswith(long_prefix) and len(orig_unit) > len(long_prefix)) or (orig_unit.startswith(short_prefix) and len(orig_unit) > len(short_prefix)):
                 prefix = short_prefix
         return prefix
 
