@@ -87,6 +87,7 @@ class UnitValue:
         for long_prefix, short_prefix in UnitValue.metric_prefix_names_to_abbrevs.items():
             if (orig_unit.startswith(long_prefix) and len(orig_unit) > len(long_prefix)) or (orig_unit.startswith(short_prefix) and len(orig_unit) > len(short_prefix)):
                 prefix = short_prefix
+                break
         return prefix
 
     @staticmethod
@@ -137,6 +138,6 @@ if __name__ == '__main__':
             print(f'{uv!s}')
             print(f'{uv!r}')
             print(uv.pretty_str())
-        except ValueError:
-            print("Invalid value entered! Please try again!")
+        except ValueError as e:
+            print("Invalid value entered! Please try again!", e)
 
