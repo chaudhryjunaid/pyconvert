@@ -66,8 +66,8 @@ class UnitValue:
     }
 
     def __init__(self, s):
-        sanitized_unit_str = s.strip().lower()
-        match_obj = re.fullmatch(r'^\s*([+-]*\d+)\s*([a-z]+)$', sanitized_unit_str)
+        sanitized_unit_str = s.strip()
+        match_obj = re.fullmatch(r'^\s*([+-]*\d+)\s*([a-z]+)\s*$', sanitized_unit_str)
         if not match_obj:
             raise ValueError
         value, orig_unit = match_obj.group(1, 2)
@@ -115,11 +115,16 @@ class UnitValue:
                     break
         return prefix, unit, unit_type
 
+    def pretty_str(self):
+        full_prefix = ''.join([k for k, v in UnitValue.metric_prefix_names_to_abbrevs.items() if v == self.prefix])
+        full_unit = ''.join([k for k, v in UnitValue.units[self.unit_type]["names_to_abbrevs"].items() if v == self.unit])
+        return f'{self.value:.2f} {full_prefix}{full_unit} ({self.unit_type})'
+
     def __str__(self):
         return f'{self.value:.2f} {self.prefix}{self.unit} ({self.unit_type})'
 
     def __repr__(self):
-        return f'<UnitValue value={self.value:.2f} unit={self.prefix}-{self.unit} (type={self.unit_type})>'
+        return f'<UnitValue value={self.value:.2f} unit={self.prefix}:{self.unit} (type={self.unit_type})>'
 
 
 if __name__ == '__main__':
@@ -131,6 +136,7 @@ if __name__ == '__main__':
             uv = UnitValue(val_str)
             print(f'{uv!s}')
             print(f'{uv!r}')
+            print(uv.pretty_str())
         except ValueError:
             print("Invalid value entered! Please try again!")
 
