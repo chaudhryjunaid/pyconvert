@@ -1,5 +1,6 @@
 import re
 
+
 class UnitValue:
     units = {
         "length": {
@@ -15,6 +16,7 @@ class UnitValue:
                 "yard": "yd",
                 "inch": "in",
                 "foot": "ft",
+                "feet": "ft",
                 "meter": "m"
             }
         },
@@ -53,7 +55,8 @@ class UnitValue:
         "c": 0.01,
         "m": 0.001,
     }
-    metric_prefix_names_to_abbrevs: {
+
+    metric_prefix_names_to_abbrevs = {
         "kilo": "k",
         "hecto": "h",
         "deka": "da",
@@ -65,20 +68,57 @@ class UnitValue:
     def __init__(self, s):
         sanitized_unit_str = s.strip().lower()
         match_obj = re.match(r'^\s*([+-]*\d+)\s*([a-z]+)$', sanitized_unit_str)
-        value, unit = match_obj.group(1, 2)
-
+        value, orig_unit = match_obj.group(1, 2)
+        prefix, unit, unit_type = UnitValue.map_unit(orig_unit)
+        self.prefix = prefix
         self.unit = unit
+        self.unit_type = unit_type
         self.value = float(value)
 
-    def get_names_to_abbrevs(self):
-        return {v: k for k, v in self.abbrevs_to_names.items()}
+    @staticmethod
+    def get_prefix(orig_unit):
+        prefix = ""
+        for long_prefix, short_prefix in UnitValue.metric_prefix_names_to_abbrevs.items():
+            if orig_unit.startswith(long_prefix) or (orig_unit.startswith(short_prefix) and len(orig_unit) > len(short_prefix)):
+                prefix = short_prefix
+        return prefix
 
-    def get_prefix_names_to_abbrevs(self):
-        return {v: k for k, v in self.metric_prefix_abbrevs_to_names.items()}
+    @staticmethod
+    def map_unit(orig_unit):
+        prefix = UnitValue.get_prefix(orig_unit)
+        remaining_unit = orig_unit.replace(prefix, '')
+        unit = None
+        unit_type = None
+        for curr_unit_type, curr_unit_data in UnitValue.units.items():
+            for long_name, abbrev in curr_unit_data["names_to_abbrevs"].items():
+                if remaining_unit.startswith(long_name) or remaining_unit.startswith(abbrev):
+                    unit_type = curr_unit_type
+                    unit = abbrev
+                    break
+            if unit and unit_type:
+                break
+        else:
+            prefix = ""
+            remaining_unit = orig_unit
+            for curr_unit_type, curr_unit_data in UnitValue.units.items():
+                for long_name, abbrev in curr_unit_data["names_to_abbrevs"].items():
+                    if orig_unit.startswith(long_name) or orig_unit.startswith(abbrev):
+                        unit_type = curr_unit_type
+                        unit = abbrev
+                        break
+                if unit and unit_type:
+                    break
+        return prefix, unit, unit_type
 
-    def convert_value(self, target_unit_or_abbrev):
+    def __str__(self):
+        return f'{self.value:.2f} {self.prefix}{self.unit} ({self.unit_type})'
+
+    def __repr__(self):
+        return f'<UnitValue value={self.value:.2f} unit={self.prefix}{self.unit} (type={self.unit_type})'
 
 
 if __name__ == '__main__':
-    lv = UnitValue("3mi")
+    uv = UnitValue("3mi")
+    print(f'{uv!s}')
+    print(f'{uv!r}')
 
